@@ -1,0 +1,11 @@
+* {
+  font-family: "Arial";
+}
+
+body {
+  text-align: center;
+}
+
+.pronostico-item {
+  padding: 0.5rem;
+}
