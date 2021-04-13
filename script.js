@@ -4,30 +4,39 @@ const tampico = {
   lon: -97.85,
 };
 
+// UTILIDADES
+
 const toCelsius = (kelvin) => Math.floor((kelvin - 273) * 10) / 10;
 
-const getWeatherData = async () => {
-  let res = await fetch(
-    `https://api.openweathermap.org/data/2.5/onecall?lat=${tampico.lat}&lon=${tampico.lon}&exclude=hourly,minutely,alerts&appid=${API_KEY}`
-  );
-  let data = await res.json();
-  console.log(data.daily);
-  populateContent(data.daily);
-};
+const getDate = (milseconds) =>
+  new Date(milseconds * 1000).toLocaleDateString();
 
+const toCapitalize = (string) => string[0].toUpperCase() + string.slice(1);
+
+let request = new XMLHttpRequest();
+request.open(
+  "GET",
+  `https://api.openweathermap.org/data/2.5/onecall?lat=${tampico.lat}&lon=${tampico.lon}&exclude=hourly,minutely,alerts&appid=${API_KEY}&lang=sp`
+);
+request.responseType = "json";
+request.send();
+
+request.onload = () => {
+  populateContent(request.response.daily);
+};
 const populateContent = (data) => {
-  const $wrapper = document.querySelector("#pronostico-wrapper");
-
-  $wrapper.innerHTML = data
-    .map(({ dt, pressure, temp, weather }, i) => {
-      return `<div class='pronostico-item'>
-      <div>${new Date(dt).toLocaleDateString()}</div>
-      <div>${pressure}mb</div>
-      <div>${toCelsius(temp.min)}C   ${toCelsius(temp.max)}C</div>
-      <div>${weather[0].main}</div>
-      </div>`;
-    })
-    .join("");
+  $("#pronostico-table").html(
+    data
+      .map(({ dt, pressure, temp, weather }, i) => {
+        return `
+      <tr>
+        <td>${getDate(dt)}</td>
+        <td>${toCelsius(temp.min)}C</td>
+        <td>${toCelsius(temp.max)}C</td>
+        <td>${pressure} mb</td>
+        <td>${toCapitalize(weather[0].description)}.</td>
+      </tr>`;
+      })
+      .join("")
+  );
 };
-
-getWeatherData();
